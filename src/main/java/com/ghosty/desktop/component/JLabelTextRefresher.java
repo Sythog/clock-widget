@@ -5,9 +5,9 @@ import java.util.function.Supplier;
 
 public class JLabelTextRefresher extends Thread {
 
-    private JLabel label;
-    private long delay;
-    private Supplier<String> textProvider;
+    private final JLabel label;
+    private final long delay;
+    private final Supplier<String> textProvider;
 
     public JLabelTextRefresher(JLabel label, long delay, Supplier<String> textProvider) {
         this.label = label;

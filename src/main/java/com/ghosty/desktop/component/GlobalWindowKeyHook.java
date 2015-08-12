@@ -1,4 +1,4 @@
-package com.ghosty.desktop.clock.widget;
+package com.ghosty.desktop.component;
 
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
