@@ -21,24 +21,26 @@ public class RefreshableJLabel extends JLabel implements Observable {
 
     @Override
     public void setFont(Font font) {
+        int oldWidth = getWidth();
         super.setFont(font);
-        refreshSize();
+        refreshSize(oldWidth);
     }
 
     @Override
     public void setText(String text) {
+        int oldWidth = getWidth();
         super.setText(text);
-        refreshSize();
+        refreshSize(oldWidth);
     }
 
-    private void refreshSize() {
+    private void refreshSize(int oldWidth) {
         if (getFont() != null) {
-            setSize(
-                    getFontMetrics(getFont()).stringWidth(textProvider == null ? "" : textProvider.get()),
-                    getFont().getSize() + 10
-            );
-            if (observers != null) {
-                notifyObservers();
+            int newWidth = getFontMetrics(getFont()).stringWidth(textProvider == null ? "" : textProvider.get());
+            if (newWidth != oldWidth) {
+                setSize(newWidth, getFont().getSize() + 10);
+                if (observers != null) {
+                    notifyObservers();
+                }
             }
         }
     }

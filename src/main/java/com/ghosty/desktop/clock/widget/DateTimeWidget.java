@@ -7,6 +7,7 @@ import com.ghosty.desktop.util.Observer;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import java.awt.Dimension;
@@ -14,11 +15,15 @@ import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.Toolkit;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import static java.awt.Color.GRAY;
 
 public class DateTimeWidget extends JDialog implements Observer {
+
+    private final List<JLabel> labels = new ArrayList<>();
 
     public DateTimeWidget() throws HeadlessException {
         setUndecorated(true);
@@ -35,6 +40,7 @@ public class DateTimeWidget extends JDialog implements Observer {
         timeLbl.setFont(new Font(timeLbl.getFont().getName(), Font.BOLD, 100));
         timeLbl.setLocation(20, 20);
         getContentPane().add(timeLbl);
+        labels.add(timeLbl);
         RefreshableJLabel dateLbl =
                 new RefreshableJLabel(
                         100,
@@ -45,6 +51,7 @@ public class DateTimeWidget extends JDialog implements Observer {
         dateLbl.setFont(new Font(dateLbl.getFont().getName(), Font.BOLD, 50));
         dateLbl.setLocation(20, 200 - 20 - dateLbl.getHeight());
         getContentPane().add(dateLbl);
+        labels.add(dateLbl);
         getContentPane().setBackground(GRAY);
         setLocation(60, (int) (screenSize.getHeight() - getSize().getHeight() - 60));
         setAlwaysOnTop(true);
@@ -57,9 +64,13 @@ public class DateTimeWidget extends JDialog implements Observer {
         if (!(o instanceof RefreshableJLabel)) {
             throw new IllegalArgumentException("Unexpected notification received");
         }
-        RefreshableJLabel label = (RefreshableJLabel) o;
-        if (label.getWidth() > getWidth() - 40)
-            setSize(label.getWidth() + 40, 200);
+        int newWidth =
+                labels.stream()
+                        .map(JComponent::getWidth)
+                        .mapToInt(Integer::intValue)
+                        .max()
+                        .orElse(385);
+        setSize(newWidth + 40, 200);
     }
 
     private void createWindowKeyHook() {
