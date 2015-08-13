@@ -2,7 +2,6 @@ package com.ghosty.desktop.clock.widget;
 
 import com.ghosty.desktop.component.GlobalWindowKeyHook;
 import com.ghosty.desktop.component.RefreshableJLabel;
-import com.ghosty.desktop.util.Observable;
 import com.ghosty.desktop.util.Observer;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -10,10 +9,10 @@ import org.jnativehook.NativeHookException;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.HeadlessException;
-import java.awt.Toolkit;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +23,8 @@ import static java.awt.Color.GRAY;
 public class DateTimeWidget extends JDialog implements Observer {
 
     private final List<JLabel> labels = new ArrayList<>();
+
+    private Point initialClick;
 
     public DateTimeWidget() throws HeadlessException {
         setUndecorated(true);
@@ -57,20 +58,20 @@ public class DateTimeWidget extends JDialog implements Observer {
         setAlwaysOnTop(true);
         setVisible(true);
         createWindowKeyHook();
+        makeWindowDraggable();
     }
 
     @Override
-    public void notify(Observable o) {
-        if (!(o instanceof RefreshableJLabel)) {
-            throw new IllegalArgumentException("Unexpected notification received");
-        }
-        int newWidth =
+    public void update() {
+        int maxLabelWidth =
                 labels.stream()
                         .map(JComponent::getWidth)
                         .mapToInt(Integer::intValue)
                         .max()
-                        .orElse(385);
-        setSize(newWidth + 40, 200);
+                        .orElse(400);
+        if (maxLabelWidth != getWidth() - 40) {
+            setSize(maxLabelWidth + 40, 200);
+        }
     }
 
     private void createWindowKeyHook() {
@@ -80,5 +81,29 @@ public class DateTimeWidget extends JDialog implements Observer {
             System.exit(1);
         }
         GlobalScreen.addNativeKeyListener(new GlobalWindowKeyHook(this, window -> window.setVisible(!window.isVisible())));
+    }
+
+    private void makeWindowDraggable() {
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                initialClick = e.getPoint();
+                getComponentAt(initialClick);
+            }
+        });
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                int thisX = getLocation().x;
+                int thisY = getLocation().y;
+
+                int xMoved = (thisX + e.getX()) - (thisX + initialClick.x);
+                int yMoved = (thisY + e.getY()) - (thisY + initialClick.y);
+
+                int newX = thisX + xMoved;
+                int newY = thisY + yMoved;
+                setLocation(newX, newY);
+            }
+        });
     }
 }

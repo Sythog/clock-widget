@@ -19,6 +19,6 @@ public interface Observable {
     }
 
     default void notifyObservers() {
-        getObservers().forEach(obs -> obs.notify(this));
+        getObservers().forEach(Observer::update);
     }
 }

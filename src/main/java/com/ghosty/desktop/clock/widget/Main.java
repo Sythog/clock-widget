@@ -15,7 +15,7 @@ public class Main {
     private static void cleanUp() {
         try {
             GlobalScreen.unregisterNativeHook();
-        } catch (NativeHookException e1) {
+        } catch (NativeHookException e) {
             System.exit(1);
         }
         System.runFinalization();
